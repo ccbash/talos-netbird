@@ -1,0 +1,32 @@
+name: netbird
+container:
+  entrypoint: /usr/local/bin/netbird
+  environment:
+    - XDG_RUNTIME_DIR=/run
+  args:
+    - up
+    - --foreground-mode
+    - --management-url
+    - https://netbird.example.com
+    - --setup-key
+    - ${NETBIRD_SETUP_KEY}
+    - --hostname
+    - ${HOSTNAME}
+  mounts:
+    - source: /var/lib/netbird
+      destination: /var/lib/netbird
+      type: bind
+      options: [rshared, bind]
+    - source: /dev/net/tun
+      destination: /dev/net/tun
+      type: bind
+      options: [bind]
+depends:
+  - configuration: true
+  - network:
+      - addresses
+      - connectivity
+      - hostname
+      - etcfiles
+restart: untilSuccess
+logToConsole: true

@@ -1,0 +1,6 @@
+version: v1alpha1
+metadata:
+  name: netbird
+  version: 0.66.0
+  author: ccbash
+  description: NetBird Talos system extension

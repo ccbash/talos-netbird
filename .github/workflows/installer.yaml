@@ -1,0 +1,41 @@
+name: build-installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      talos_version:
+        required: true
+        default: v1.12.4
+      arch:
+        required: true
+        default: amd64
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build installer assets
+        run: |
+          mkdir -p _out
+          docker run --rm --privileged \
+            -v "$PWD/_out:/out" \
+            ghcr.io/siderolabs/imager:${{ inputs.talos_version }} \
+            metal --arch ${{ inputs.arch }} \
+            --system-extension-image ghcr.io/${{ github.repository_owner }}/talos-netbird:latest
+
+      - name: Upload generated assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: talos-installer-assets
+          path: _out/
